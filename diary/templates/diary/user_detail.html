@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}Профиль {{ profile_user.username }}{% endblock %}
+{% block content %}
+<h1>Профиль: {{ profile_user.username }}</h1>
+<h3>Путешествия</h3>
+<ul class="post-list">
+  {% for t in trips %}
+  <li class="card">
+    <h3><a href="{{ t.get_absolute_url }}">{{ t.title }}</a></h3>
+    <div class="meta">{{ t.city }} {{ t.country }} • {{ t.created_at|date:"d.m.Y H:i" }}</div>
+  </li>
+  {% empty %}<li>Пока нет записей.</li>{% endfor %}
+</ul>
+{% endblock %}

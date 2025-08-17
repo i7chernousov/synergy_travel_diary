@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Лента путешествий{% endblock %}
+{% block content %}
+<h1>Лента путешествий</h1>
+
+<form method="get" class="filters">
+  <div>
+    <label>Страна</label>
+    <input type="text" name="country" value="{{ request.GET.country }}" placeholder="Напр. Латвия" onblur="this.form.submit()">
+  </div>
+  <div>
+    <label>Город</label>
+    <input type="text" name="city" value="{{ request.GET.city }}" placeholder="Напр. Рига" onblur="this.form.submit()">
+  </div>
+  {% if request.GET.user %}
+    <a class="btn" href="{% url 'trip_list' %}">Сбросить</a>
+  {% endif %}
+</form>
+
+<ul class="post-list">
+  {% for t in trips %}
+  <li class="card">
+    <h3><a href="{{ t.get_absolute_url }}">{{ t.title }}</a></h3>
+    <div class="meta">
+      Автор: <a href="{% url 'user_detail' t.user.id %}">{{ t.user.username }}</a> •
+      {{ t.city }} {{ t.country }} • {{ t.created_at|date:"d.m.Y H:i" }}
+      {% if t.avg_rating %} • Ср. оценка: {{ t.avg_rating }} / 5{% endif %}
+    </div>
+    <p>{{ t.description|truncatewords:30 }}</p>
+  </li>
+  {% empty %}
+    <li>Записей пока нет.</li>
+  {% endfor %}
+</ul>
+{% endblock %}

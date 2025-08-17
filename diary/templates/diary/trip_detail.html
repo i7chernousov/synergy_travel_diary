@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block title %}{{ trip.title }}{% endblock %}
+{% block content %}
+<article class="card">
+  <header class="flex-between">
+    <div>
+      <h1>{{ trip.title }}</h1>
+      <div class="meta">
+        Автор: <a href="{% url 'user_detail' trip.user.id %}">{{ trip.user.username }}</a> •
+        {{ trip.city }} {{ trip.country }}
+        {% if trip.start_date %} • Даты: {{ trip.start_date|date:"d.m.Y" }} — {{ trip.end_date|date:"d.m.Y" }}{% endif %}
+        {% if trip.total_cost %} • Стоимость: {{ trip.total_cost }} ₽{% endif %}
+      </div>
+    </div>
+    {% if user == trip.user %}
+      <div class="actions">
+        <a class="btn" href="{% url 'trip_update' trip.pk %}">Редактировать</a>
+        <a class="btn danger" href="{% url 'trip_delete' trip.pk %}">Удалить</a>
+      </div>
+    {% endif %}
+  </header>
+
+  {% if trip.latitude and trip.longitude %}
+  <div id="map" style="height: 300px; border-radius: 12px; margin: .5rem 0;"></div>
+  <script>
+    const map = L.map('map').setView([{{ trip.latitude }}, {{ trip.longitude }}], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap'
+    }).addTo(map);
+    L.marker([{{ trip.latitude }}, {{ trip.longitude }}]).addTo(map)
+      .bindPopup('{{ trip.city|default:trip.country }}').openPopup();
+  </script>
+  {% endif %}
+
+  <p>{{ trip.description|linebreaks }}</p>
+
+  <section>
+    <h3>Оценки</h3>
+    <ul>
+      {% if trip.rating_convenience %}<li>Удобство передвижения: {{ trip.rating_convenience }}/5</li>{% endif %}
+      {% if trip.rating_safety %}<li>Безопасность: {{ trip.rating_safety }}/5</li>{% endif %}
+      {% if trip.rating_crowd %}<li>Населённость: {{ trip.rating_crowd }}/5</li>{% endif %}
+      {% if trip.rating_greenery %}<li>Растительность: {{ trip.rating_greenery }}/5</li>{% endif %}
+    </ul>
+  </section>
+
+  {% if trip.places_to_visit.all %}
+  <section>
+    <h3>Места для посещения</h3>
+    <ul>
+      {% for p in trip.places_to_visit.all %}<li>{{ p.name }}</li>{% empty %}<li>—</li>{% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+
+  {% if trip.heritage_sites.all %}
+  <section>
+    <h3>Объекты культурного наследия</h3>
+    <ul>
+      {% for p in trip.heritage_sites.all %}<li>{{ p.name }}</li>{% empty %}<li>—</li>{% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+
+  <section>
+    <h3>Фотографии</h3>
+    <div class="gallery">
+      {% for ph in trip.photos.all %}
+        <figure>
+          <img src="{{ ph.image.url }}" alt="{{ ph.caption }}">
+          {% if ph.caption %}<figcaption>{{ ph.caption }}</figcaption>{% endif %}
+        </figure>
+      {% empty %}
+        <p>Фото ещё не добавлены.</p>
+      {% endfor %}
+    </div>
+  </section>
+</article>
+{% endblock %}
